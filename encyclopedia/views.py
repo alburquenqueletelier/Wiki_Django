@@ -15,17 +15,5 @@ def index(request):
 
 
 def show(request, select):
-    if request.method == "POST":
-        select = search(request.POST)
-        if select.is_valid():
-            select_ = form.cleaned_data["select_"]
-            if select_ in util.list_entries():
-                see = {'select' : select_, 'see' : markdown2.markdown(util.get_entry(select_))}
-                return render(request, "encyclopedia/show.html", see)
-            else:
-                return render(request, "encyclopedia/404.html")
-        else:
-            return HttpResponseRedirect(reverse("wiki:404"))
-    else:
-        see = {'select' : select, 'see' : markdown2.markdown(util.get_entry(select))}
-        return render(request, "encyclopedia/show.html", see)
+    see = {'select' : select, 'see' : markdown2.markdown(util.get_entry(select))}
+    return render(request, "encyclopedia/show.html", see)
