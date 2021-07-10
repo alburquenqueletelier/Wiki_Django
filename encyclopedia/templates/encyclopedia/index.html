@@ -5,12 +5,18 @@
 {% endblock %}
 
 {% block body %}
+    {% if not select %}
     <h1>All Pages</h1>
 
     <ul>
         {% for entry in entries %}
-            <li><a href="{% url 'encyclopedia:show' entry %}">{{ entry }}</a></li>
+            <li><a href="{% url 'encyclopedia:index' entry %}">{{ entry }}</a></li>
         {% endfor %}
     </ul>
+    {% else %}
+
+    {{ see|safe }}
+
+    {% endif %}
 
 {% endblock %}
