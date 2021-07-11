@@ -13,9 +13,15 @@
             <li><a href="{% url 'encyclopedia:index' entry %}">{{ entry }}</a></li>
         {% endfor %}
     </ul>
-    {% else %}
+    {% elif see %}
 
     {{ see|safe }}
+
+    {% else %}
+
+    <h1> Not found </h1>
+
+    <h4> The file {{ select }} doesn't exist</h4>
 
     {% endif %}
 
