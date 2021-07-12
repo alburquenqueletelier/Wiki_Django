@@ -15,7 +15,7 @@
                 <form action="{% url 'encyclopedia:index' %}" method="post">
                     {% csrf_token %}
                     {{ search_q }}
-                    <input type="submit">
+                    <input type="submit" value="Search">
                 </form>
                 <div>
                     <a href="{% url 'encyclopedia:index' %}">Home</a>
@@ -24,7 +24,7 @@
                     <a href="{% url 'encyclopedia:create' %}">Create New Page</a>
                 </div>
                 <div>
-                    Random Page
+                    <a href="{% url 'encyclopedia:index' entries|random %}">Random Page</a>
                 </div>
                 {% block nav %}
                 {% endblock %}

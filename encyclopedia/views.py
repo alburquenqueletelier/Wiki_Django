@@ -4,6 +4,7 @@ from . import util
 from django import forms
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+import random
 
 class busqueda(forms.Form):
     q = forms.CharField(label="Search wiki") 
