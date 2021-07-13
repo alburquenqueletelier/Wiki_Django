@@ -24,7 +24,7 @@ def index(request, select=None):
         "select" : select,
         "see" : None
     }
-
+    entries_l = [entries_l.lower() for entries_l in context['entries']]
     if request.method == "POST":
         search_q = busqueda(request.POST)
         if search_q.is_valid():
@@ -33,15 +33,27 @@ def index(request, select=None):
             return HttpResponseRedirect(reverse("encyclopedia:index", args=request.session["search"]))
         else:
             return render(request, "encyclopedia/index.html", context)
-    else:
-        if select in context['entries']:
-            context["see"] = markdown2.markdown(util.get_entry(select))
-
+    elif select:
+        select_l = select.lower()
+        if select_l in entries_l:
+            index = entries_l.index(select_l)        
+            context["see"] = markdown2.markdown(util.get_entry(context["entries"][index]))
+        else:
+            lista = []
+            for x in entries_l:
+                if (len(x) - x.find(select_l))/len(x) >= 2/3 and x.find(select_l) >= 0 and len(select_l) >=2:
+                    lista.append(context["entries"][entries_l.index(x)])
+            if lista:
+                context["entries"] = lista
+                context["see"] = 'Search'
+        
     return render(request, "encyclopedia/index.html", context)
 
 
 def create(request):
-    context = {'form': new()}
+    context = {'form': new(),
+                'entries':util.list_entries()
+    }
     if request.method == "POST":
         form = new(request.POST)
         if form.is_valid():
