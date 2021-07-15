@@ -4,7 +4,8 @@ from . import util
 from django import forms
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-import random
+import random #Used in layout template#
+from django.contrib import messages
 
 class busqueda(forms.Form):
     q = forms.CharField(label="Search wiki") 
@@ -41,7 +42,7 @@ def index(request, select=None):
         else:
             lista = []
             for x in entries_l:
-                if (len(x) - x.find(select_l))/len(x) >= 2/3 and x.find(select_l) >= 0 and len(select_l) >=2:
+                if select_l in x and len(select_l)/len(x) >= 2/3:
                     lista.append(context["entries"][entries_l.index(x)])
             if lista:
                 context["entries"] = lista
@@ -52,16 +53,52 @@ def index(request, select=None):
 
 def create(request):
     context = {'form': new(),
-                'entries':util.list_entries()
+                'entries':util.list_entries(),
+                'error':None
     }
+    entries_l = [entries_l.lower() for entries_l in context['entries']]
     if request.method == "POST":
         form = new(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             text = form.cleaned_data['text']
-            util.save_entry(title, text)
-            return HttpResponseRedirect(reverse('encyclopedia:create'))
-        else:
-            return render(request, "encyclopedia/create.html", context)
-    
+            if title.lower() not in entries_l:
+                util.save_entry(title, text)
+                return HttpResponseRedirect(reverse('encyclopedia:index', kwargs={'select':title}))
+            else:
+                context["error"] = f"Title '{title}' in use: please change this"
+
     return render(request, "encyclopedia/create.html", context)
+
+def edit(request, select):
+    title = select
+    text = util.get_entry(title)
+    editor = new({'title':select, 'text':text})
+    entries = util.list_entries()
+    entries_l = [entries_l.lower() for entries_l in entries]
+
+    context = {
+        'edit': editor,
+        'error': None,
+        'entries':entries,
+        'form': editor,
+        'select': select
+    }
+
+    if request.method == "POST":
+        form = new(request.POST)
+        if form.is_valid():
+            title_f = form.cleaned_data['title']
+            text_f = form.cleaned_data['text']
+            if title_f.lower() not in entries_l:
+                util.save_entry(title_f, text_f)
+                context["error"] = None
+                return HttpResponseRedirect(reverse('encyclopedia:index'))
+            elif title_f.lower() == title.lower():
+                util.save_entry(title_f, text_f)
+                context["error"] = None
+                return HttpResponseRedirect(reverse('encyclopedia:index'))
+            else:
+                context["error"] = f"{title_f.lower() == title.lower()}"
+    
+    return render(request, "encyclopedia/edit.html", context)

@@ -16,7 +16,7 @@
     {% elif see %}
 
     {{ see|safe }}
-
+    <a href="{% url 'encyclopedia:edit' select %}">Edit</a>
     {% else %}
 
     <h1> Not found </h1>

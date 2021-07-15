@@ -1,0 +1,19 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Edit wiki {{select}}
+{% endblock %}
+
+{% block body %}
+    {%if not error%}
+    <h1>Edit wiki "{{ select }}"</h1>
+    <form action="{% url 'encyclopedia:edit' select %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save">
+    </form>
+    {% else %}
+    <h1 style="color:red">ERROR: Bad request</h1>
+    <h3>{{ error }}</h3>
+    {% endif %}
+{% endblock %}
