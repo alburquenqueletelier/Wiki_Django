@@ -6,6 +6,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 import random #Used in layout template#
 from django.contrib import messages
+from django.core.cache import cache
+
+cache.clear()
 
 class busqueda(forms.Form):
     q = forms.CharField(label="Search wiki") 
@@ -25,6 +28,7 @@ def index(request, select=None):
         "select" : select,
         "see" : None
     }
+
     entries_l = [entries_l.lower() for entries_l in context['entries']]
     if request.method == "POST":
         search_q = busqueda(request.POST)
@@ -32,8 +36,6 @@ def index(request, select=None):
             q = search_q.cleaned_data['q']
             request.session["search"] = [q]
             return HttpResponseRedirect(reverse("encyclopedia:index", args=request.session["search"]))
-        else:
-            return render(request, "encyclopedia/index.html", context)
     elif select:
         select_l = select.lower()
         if select_l in entries_l:
@@ -74,12 +76,13 @@ def edit(request, select):
     title = select
     text = util.get_entry(title)
     editor = new({'title':select, 'text':text})
+    editor.fields['title'].hidden = False
+    editor.fields['title'].disabled = True
+    editor.fields['title'].required = False
     entries = util.list_entries()
     entries_l = [entries_l.lower() for entries_l in entries]
 
     context = {
-        'edit': editor,
-        'error': None,
         'entries':entries,
         'form': editor,
         'select': select
@@ -87,18 +90,10 @@ def edit(request, select):
 
     if request.method == "POST":
         form = new(request.POST)
+        form.fields["title"].required = False
         if form.is_valid():
-            title_f = form.cleaned_data['title']
             text_f = form.cleaned_data['text']
-            if title_f.lower() not in entries_l:
-                util.save_entry(title_f, text_f)
-                context["error"] = None
-                return HttpResponseRedirect(reverse('encyclopedia:index'))
-            elif title_f.lower() == title.lower():
-                util.save_entry(title_f, text_f)
-                context["error"] = None
-                return HttpResponseRedirect(reverse('encyclopedia:index'))
-            else:
-                context["error"] = f"{title_f.lower() == title.lower()}"
-    
+            util.save_entry(title, text_f)
+            return HttpResponseRedirect(reverse('encyclopedia:index', kwargs={'select':title}))
+
     return render(request, "encyclopedia/edit.html", context)

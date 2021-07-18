@@ -6,21 +6,11 @@
 
 {% block body %}
     {% if not error %}
-    <div class="container">
-        <div class="row justify-content-start">
-            <div class="col" style="margin-left: 50px;">
-                <h1> Create a wiki</h1>
-            </div>
-        </div>
-        <div class="row justify-content-start">
-            <div class="col-auto">
-                <form action="{% url 'encyclopedia:create' %}" method="post">{% csrf_token %}
-                    {{ form.as_p }}
-                    <input type="submit" value="Save">
-                </form>
-            </div>
-        </div>
-    </div>
+    <h1> Create a wiki</h1>
+    <form action="{% url 'encyclopedia:create' %}" method="post">{% csrf_token %}
+        {{ form.as_p}}
+        <input type="submit" value="Save">
+    </form>
     {% else %}
     <h1 style="color:red">ERROR: Bad request</h1>
     <h3>{{ error }}</h3>
